@@ -3,4 +3,4 @@ steps:
   args: ['build', '-t', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA', '.']
   # the image can be found in the cloud build trigger history
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', '-t', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA']
+  args: ['push', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA']
