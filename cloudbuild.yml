@@ -1,0 +1,31 @@
+steps:
+
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  dir: 'sample_code/demo-1-hello-world-api'
+  args: ['build', '-t', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA', '.']
+
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA']
+
+# Deploy container image to Cloud Run
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - 'svc-helloworld'
+    - '--image'
+    - 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+    - '--min-instances'
+    - '1'
+    - '--max-instances'
+    - '1'
+    - '--allow-unauthenticated'
+images:
+- 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker'
