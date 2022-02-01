@@ -6,7 +6,7 @@ steps:
 
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/secret:$SHORT_SHA']
+  args: ['push', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA']
 
 # Deploy container image to Cloud Run
 - name: 'gcr.io/cloud-builders/gcloud'
