@@ -2,7 +2,6 @@ steps:
 
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  dir: 'sample_code/demo-1-hello-world-api'
   args: ['build', '-t', 'gcr.io/devops-ss-sandbox/github.com/sunnyseera/docker:$SHORT_SHA', '.']
 
 # Push the container image to Container Registry
