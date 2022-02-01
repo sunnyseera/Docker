@@ -1,19 +1,25 @@
-# Base Image
-FROM node:13-slim
+# Use the official Python image.
+# https://hub.docker.com/_/python
+FROM python:3.9-slim
 
-# Folder on the container where we will place our files 
-WORKDIR /app
 
-# Add all of the files from this folder to the app folder
-ADD . /app 
+# Allow statements and log messages to immediately appear in the Cloud Run logs
+ENV PYTHONUNBUFFERED True
 
-# The command that you want the container to start with 
-CMD node server.js
+# Copy application dependency manifests to the container image.
+# Copying this separately prevents re-running pip install on every code change.
+COPY requirements.txt ./
 
-# To build the docker container 
-    # docker build -t cloudrunapp . 
+# Install production dependencies.
+RUN pip install -r requirements.txt
 
-# To run the docker container 
-    # docker run -it -p 8080:8080 cloudrunapp
+# Copy local code to the container image.
+ENV APP_HOME /app
+WORKDIR $APP_HOME
+COPY . ./
 
-    
+# Run the web service on container startup.
+# Use gunicorn webserver with one worker process and 8 threads.
+# For environments with multiple CPU cores, increase the number of workers
+# to be equal to the cores available.
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
