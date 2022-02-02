@@ -1,42 +1,35 @@
 import os
-from flask import Flask, jsonify
-import requests
-from google.cloud import secretmanager_v1
+from flask import Flask, jsonify, request
+import base64
+
 
 app = Flask(__name__)
 
-# Create Secert Name
-secret_name = "my_awesome_secret_from_secret_manager"
 
-# Create CLient
-secret_manager_client = secretmanager_v1.SecretManagerServiceClient()
+@app.route("/", methods=["POST"])
+def receive_pubsub_messages():
+    print("message received")
 
+    envelope = request.get_json()
 
-def get_numeric_project_id():
-    METADATA_URL = 'http://metadata.google.internal/computeMetadata/v1/'
-    METADATA_HEADERS = {'Metadata-Flavor': 'Google'}
+    if not envelope:
+        msg = "no Pub/Sub message received"
+        print(f"error: {msg}")
+        return f"Bad Request: {msg}", 400
 
-    try:
-        url = METADATA_URL + 'project/numeric-project-id'
-        resp = requests.get(
-            url,
-            headers=METADATA_HEADERS)
-        print("Project id is {}".format(resp.text))
-        return resp.text
-    except requests.exceptions.ConnectionError:
-        return "XXX"
+    if not isinstance(envelope, dict) or "message" not in envelope:
+        msg = "invalid Pub/Sub message format"
+        print(f"error: {msg}")
+        return f"Bad Request: {msg}", 400
 
+    if "message" in envelope and "data" in envelope["message"]:
+        pubsub_message = base64.b64decode(envelope["message"]["data"])
+    else:
+        pubsub_message = envelope["message"]
 
-@app.route("/", methods=["GET"])
-def read_secrets():
+    print(pubsub_message)
 
-    my_secret = secret_manager_client.access_secret_version(
-        name=f"projects/{get_numeric_project_id()}/secrets/{secret_name}/versions/latest"
-    )
-
-    my_secret_str = my_secret.payload.data.decode('UTF-8')
-
-    return jsonify(my_awesome_secret_from_secret_manager=f"{my_secret_str}"), 200
+    return jsonify(message=True), 200
 
 
 if __name__ == '__main__':
